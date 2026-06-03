@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>InvestBD - Admin Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    :root{--gold:#f5c518;--gold-dark:#c9a000;--dark:#0a0a0f;--dark2:#111118;--text:#e8e8f0;--text-muted:#888899;--error:#ff5252;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Hind Siliguri',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;}
+    .bg{position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 30%,rgba(255,82,82,0.06) 0%,transparent 60%),linear-gradient(135deg,#0a0a0f,#111118);}
+    .bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(255,82,82,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,82,82,0.02) 1px,transparent 1px);background-size:40px 40px;}
+    .wrapper{position:relative;z-index:1;width:100%;max-width:420px;padding:20px;}
+    .logo-area{text-align:center;margin-bottom:32px;}
+    .logo-icon{width:60px;height:60px;background:linear-gradient(135deg,#ff5252,#c62828);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:26px;box-shadow:0 0 30px rgba(255,82,82,0.3);}
+    .logo-title{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:800;color:#ff5252;}
+    .logo-sub{font-size:0.78rem;color:var(--text-muted);margin-top:4px;letter-spacing:2px;text-transform:uppercase;}
+    .card{background:rgba(17,17,24,0.9);border:1px solid rgba(255,82,82,0.15);border-radius:20px;padding:32px;backdrop-filter:blur(20px);box-shadow:0 30px 80px rgba(0,0,0,0.5);}
+    .card-title{font-size:1.1rem;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+    .card-title i{color:#ff5252;}
+    .card-sub{font-size:0.8rem;color:var(--text-muted);margin-bottom:24px;}
+    .form-group{margin-bottom:18px;}
+    .form-group label{display:block;font-size:0.78rem;color:var(--text-muted);margin-bottom:7px;font-weight:500;}
+    .input-wrap{position:relative;}
+    .input-wrap i.ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:13px;transition:color 0.3s;pointer-events:none;}
+    .input-wrap input{width:100%;padding:13px 14px 13px 40px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:var(--text);font-family:'Hind Siliguri',sans-serif;font-size:0.92rem;outline:none;transition:all 0.3s;}
+    .input-wrap input:focus{border-color:#ff5252;background:rgba(255,82,82,0.04);box-shadow:0 0 0 3px rgba(255,82,82,0.08);}
+    .input-wrap:focus-within i.ico{color:#ff5252;}
+    .pw-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--text-muted);font-size:13px;}
+    .pw-toggle:hover{color:#ff5252;}
+    .alert{padding:12px 14px;border-radius:8px;font-size:0.82rem;margin-bottom:16px;display:none;align-items:center;gap:8px;background:rgba(255,82,82,0.1);border:1px solid rgba(255,82,82,0.2);color:var(--error);}
+    .alert.show{display:flex;}
+    .submit-btn{width:100%;padding:14px;background:linear-gradient(135deg,#ff5252,#c62828);border:none;border-radius:10px;color:#fff;font-family:'Hind Siliguri',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all 0.25s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;}
+    .submit-btn:hover{transform:translateY(-1px);box-shadow:0 8px 25px rgba(255,82,82,0.3);}
+    .submit-btn:disabled{opacity:0.7;cursor:not-allowed;transform:none;}
+    .back-link{text-align:center;margin-top:16px;font-size:0.8rem;color:var(--text-muted);}
+    .back-link a{color:#ff5252;text-decoration:none;}
+    .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="bg-grid"></div>
+<div class="wrapper">
+  <div class="logo-area">
+    <div class="logo-icon">🔐</div>
+    <div class="logo-title">Admin Panel</div>
+    <div class="logo-sub">InvestBD · Restricted Access</div>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="fas fa-shield-alt"></i> Admin Login</div>
+    <div class="card-sub">শুধুমাত্র অনুমোদিত ব্যক্তি প্রবেশ করতে পারবেন</div>
+    <div class="alert" id="login-alert"><i class="fas fa-exclamation-circle"></i> <span id="alert-msg">ভুল username বা password!</span></div>
+    <div class="form-group">
+      <label>Admin Username</label>
+      <div class="input-wrap">
+        <i class="fas fa-user-shield ico"></i>
+        <input type="text" id="username" placeholder="Username লিখুন"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <div class="input-wrap">
+        <i class="fas fa-lock ico"></i>
+        <input type="password" id="password" placeholder="Password লিখুন"/>
+        <span class="pw-toggle" onclick="togglePw()"><i class="fas fa-eye" id="pw-icon"></i></span>
+      </div>
+    </div>
+    <button class="submit-btn" onclick="adminLogin()" id="login-btn">
+      <i class="fas fa-sign-in-alt"></i> Admin Login
+    </button>
+    <div class="back-link"><a href="index.html"><i class="fas fa-arrow-left"></i> User Login এ ফিরে যান</a></div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCu-UBa4vCRLByPkQqlb5JjVvuHqMFPYxM",
+    authDomain: "investbd-783df.firebaseapp.com",
+    projectId: "investbd-783df",
+    storageBucket: "investbd-783df.firebasestorage.app",
+    messagingSenderId: "1043148979663",
+    appId: "1:1043148979663:web:20465ee152597ce101e6ba"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  window.togglePw = function(){
+    const input = document.getElementById('password');
+    const icon  = document.getElementById('pw-icon');
+    if(input.type==='password'){input.type='text';icon.className='fas fa-eye-slash';}
+    else{input.type='password';icon.className='fas fa-eye';}
+  }
+
+  window.adminLogin = async function(){
+    const user = document.getElementById('username').value.trim();
+    const pass = document.getElementById('password').value;
+    const btn  = document.getElementById('login-btn');
+    const alert= document.getElementById('login-alert');
+
+    if(!user||!pass){
+      document.getElementById('alert-msg').textContent='Username এবং Password দিন।';
+      alert.classList.add('show'); return;
+    }
+
+    btn.innerHTML='<span class="spinner"></span> যাচাই হচ্ছে...';
+    btn.disabled = true;
+
+    try {
+      // ✅ Firebase থেকে password check — code এ কোনো password নেই!
+      const snap = await getDoc(doc(db,'settings','admin'));
+      if(snap.exists()){
+        const data = snap.data();
+        if(user === data.username && pass === data.password){
+          sessionStorage.setItem('adminLoggedIn','true');
+          window.location.href='admin.html';
+          return;
+        }
+      }
+      // Wrong credentials
+      btn.innerHTML='<i class="fas fa-sign-in-alt"></i> Admin Login';
+      btn.disabled = false;
+      document.getElementById('alert-msg').textContent='ভুল Username বা Password!';
+      alert.classList.add('show');
+      setTimeout(()=>alert.classList.remove('show'),3000);
+    } catch(e){
+      btn.innerHTML='<i class="fas fa-sign-in-alt"></i> Admin Login';
+      btn.disabled = false;
+      document.getElementById('alert-msg').textContent='সমস্যা হয়েছে। আবার চেষ্টা করুন।';
+      alert.classList.add('show');
+    }
+  }
+
+  document.addEventListener('keydown',e=>{if(e.key==='Enter')window.adminLogin();});
+</script>
+</body>
+</html>
