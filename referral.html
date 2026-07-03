@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>InvestBD - Referral</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    :root{--gold:#f5c518;--gold-light:#ffd84d;--gold-dark:#c9a000;--dark:#0a0a0f;--dark2:#111118;--text:#e8e8f0;--text-muted:#888899;--success:#00e676;--error:#ff5252;--warning:#ffab40;--border:rgba(245,197,24,0.15);--sidebar-w:260px;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Hind Siliguri',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;display:flex;}
+    .sidebar{width:var(--sidebar-w);background:var(--dark2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;transition:transform 0.3s;}
+    .sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+    .sidebar-logo .logo-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+    .sidebar-logo .logo-text{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:800;background:linear-gradient(135deg,var(--gold-light),var(--gold-dark));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .sidebar-user{padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+    .avatar{width:44px;height:44px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#000;flex-shrink:0;}
+    .sidebar-nav{flex:1;padding:16px 12px;overflow-y:auto;}
+    .nav-section{margin-bottom:24px;}
+    .nav-section-title{font-size:0.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1.5px;padding:0 8px;margin-bottom:8px;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;cursor:pointer;transition:all 0.2s;color:var(--text-muted);font-size:0.88rem;font-weight:500;margin-bottom:2px;text-decoration:none;}
+    .nav-item i{width:18px;text-align:center;font-size:15px;}
+    .nav-item:hover{background:rgba(245,197,24,0.06);color:var(--text);}
+    .nav-item.active{background:rgba(245,197,24,0.1);color:var(--gold);border:1px solid rgba(245,197,24,0.15);}
+    .sidebar-bottom{padding:16px 12px;border-top:1px solid var(--border);}
+    .logout-btn{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;cursor:pointer;color:var(--error);font-size:0.88rem;font-weight:500;width:100%;background:none;border:none;font-family:'Hind Siliguri',sans-serif;}
+    .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;}
+    .topbar{background:rgba(17,17,24,0.95);border-bottom:1px solid var(--border);padding:0 28px;height:64px;display:flex;align-items:center;position:sticky;top:0;z-index:50;backdrop-filter:blur(10px);}
+    .topbar-left{display:flex;align-items:center;gap:12px;}
+    .menu-toggle{display:none;background:none;border:none;color:var(--text);font-size:20px;cursor:pointer;}
+    .page-title{font-size:1.1rem;font-weight:600;}
+    .content{padding:28px;max-width:860px;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading-screen{position:fixed;inset:0;background:var(--dark);z-index:999;display:flex;align-items:center;justify-content:center;}
+    .spin{width:32px;height:32px;border:3px solid rgba(245,197,24,0.2);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;}
+
+    /* Free Plan Mission Box */
+    .mission-box{background:linear-gradient(135deg,rgba(245,197,24,0.12),rgba(245,197,24,0.03));border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:24px;animation:fadeUp 0.5s ease both;}
+    .mission-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+    .mission-icon{width:48px;height:48px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+    .mission-title{font-size:1.1rem;font-weight:700;}
+    .mission-sub{font-size:0.8rem;color:var(--text-muted);margin-top:3px;}
+    .mission-tasks{display:flex;flex-direction:column;gap:12px;margin-bottom:20px;}
+    .mission-task{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px;display:flex;align-items:center;gap:14px;}
+    .mission-task.done{border-color:rgba(0,230,118,0.2);background:rgba(0,230,118,0.03);}
+    .mission-task-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+    .mission-task.done .mission-task-icon{background:rgba(0,230,118,0.1);color:var(--success);}
+    .mission-task:not(.done) .mission-task-icon{background:rgba(245,197,24,0.1);color:var(--gold);}
+    .mission-task-info{flex:1;}
+    .mission-task-title{font-size:0.88rem;font-weight:600;margin-bottom:3px;}
+    .mission-task-progress{font-size:0.78rem;color:var(--text-muted);}
+    .mission-task-badge{font-size:0.72rem;padding:3px 10px;border-radius:20px;font-weight:600;white-space:nowrap;}
+    .mission-task.done .mission-task-badge{background:rgba(0,230,118,0.1);color:var(--success);border:1px solid rgba(0,230,118,0.2);}
+    .mission-task:not(.done) .mission-task-badge{background:rgba(245,197,24,0.1);color:var(--gold);border:1px solid rgba(245,197,24,0.2);}
+    .mission-progress{margin-bottom:16px;}
+    .mission-progress-label{display:flex;justify-content:space-between;font-size:0.78rem;color:var(--text-muted);margin-bottom:8px;}
+    .mission-progress-bar{height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;}
+    .mission-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-light));border-radius:4px;transition:width 0.5s ease;}
+    .free-plan-preview{background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.15);border-radius:12px;padding:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+    .free-plan-preview .title{font-size:0.88rem;font-weight:700;color:var(--success);margin-bottom:6px;}
+    .free-plan-preview .details{display:flex;gap:16px;flex-wrap:wrap;}
+    .free-plan-detail{font-size:0.78rem;color:var(--text-muted);}
+    .free-plan-detail span{color:var(--text);font-weight:600;}
+    .claim-btn{padding:11px 24px;background:linear-gradient(135deg,var(--success),#00c853);border:none;border-radius:10px;color:#000;font-family:'Hind Siliguri',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.2s;}
+    .claim-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,230,118,0.3);}
+    .claim-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+    .already-claimed{padding:8px 16px;background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.2);border-radius:10px;color:var(--success);font-size:0.82rem;font-weight:600;}
+
+    /* Stats */
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;animation:fadeUp 0.5s ease 0.1s both;}
+    .stat-card{background:var(--dark2);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden;}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+    .stat-card.c1::before{background:linear-gradient(90deg,var(--gold),var(--gold-light));}
+    .stat-card.c2::before{background:linear-gradient(90deg,var(--success),#69f0ae);}
+    .stat-card.c3::before{background:linear-gradient(90deg,#42a5f5,#80d8ff);}
+    .stat-card.c4::before{background:linear-gradient(90deg,#ab47bc,#e040fb);}
+    .stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:12px;}
+    .c1 .stat-icon{background:rgba(245,197,24,0.1);color:var(--gold);}
+    .c2 .stat-icon{background:rgba(0,230,118,0.1);color:var(--success);}
+    .c3 .stat-icon{background:rgba(66,165,245,0.1);color:#42a5f5;}
+    .c4 .stat-icon{background:rgba(171,71,188,0.1);color:#ab47bc;}
+    .stat-lbl{font-size:0.75rem;color:var(--text-muted);margin-bottom:5px;}
+    .stat-val{font-size:1.4rem;font-weight:700;}
+    .c1 .stat-val{color:var(--gold);}
+    .c2 .stat-val{color:var(--success);}
+    .c3 .stat-val{color:#42a5f5;}
+    .c4 .stat-val{color:#ab47bc;}
+
+    /* Referral */
+    .ref-hero{background:linear-gradient(135deg,rgba(245,197,24,0.1),rgba(245,197,24,0.02));border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:24px;animation:fadeUp 0.5s ease 0.2s both;}
+    .ref-hero-title{font-size:1rem;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+    .ref-hero-title i{color:var(--gold);}
+    .ref-hero-sub{font-size:0.82rem;color:var(--text-muted);margin-bottom:18px;}
+    .ref-code-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px;}
+    .ref-code-box{flex:1;background:rgba(0,0,0,0.3);border:1px dashed rgba(245,197,24,0.3);border-radius:10px;padding:12px 16px;font-size:1.2rem;font-weight:700;color:var(--gold);letter-spacing:3px;min-width:140px;}
+    .copy-btn{padding:11px 18px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border:none;border-radius:10px;color:#000;font-family:'Hind Siliguri',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer;white-space:nowrap;}
+    .ref-link-row{display:flex;gap:10px;align-items:center;margin-bottom:14px;}
+    .ref-link-box{flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px 14px;font-size:0.78rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .copy-link-btn{padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--text);font-family:'Hind Siliguri',sans-serif;font-size:0.8rem;cursor:pointer;}
+    .share-btns{display:flex;gap:10px;flex-wrap:wrap;}
+    .share-btn{padding:8px 16px;border-radius:10px;border:none;font-family:'Hind Siliguri',sans-serif;font-size:0.8rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;}
+    .share-btn.wa{background:rgba(37,211,102,0.15);color:#25d366;border:1px solid rgba(37,211,102,0.2);}
+    .share-btn.fb{background:rgba(66,103,178,0.15);color:#4267b2;border:1px solid rgba(66,103,178,0.2);}
+    .share-btn.tg{background:rgba(0,136,204,0.15);color:#0088cc;border:1px solid rgba(0,136,204,0.2);}
+
+    /* Bonus table */
+    .panel{background:var(--dark2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px;}
+    .panel-header{padding:16px 20px;border-bottom:1px solid var(--border);font-size:0.92rem;font-weight:600;display:flex;align-items:center;gap:8px;}
+    .panel-header i{color:var(--gold);}
+    .bonus-table{width:100%;border-collapse:collapse;}
+    .bonus-table th{font-size:0.73rem;color:var(--text-muted);font-weight:600;text-align:left;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.05);}
+    .bonus-table td{font-size:0.82rem;padding:11px 16px;border-bottom:1px solid rgba(255,255,255,0.03);}
+    .bonus-table tr:last-child td{border-bottom:none;}
+
+    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;}
+    .overlay.show{display:block;}
+    @media(max-width:1100px){.stats-grid{grid-template-columns:repeat(2,1fr);}}
+    @media(max-width:768px){.sidebar{transform:translateX(-100%);}.sidebar.open{transform:translateX(0);}.main{margin-left:0;}.menu-toggle{display:block;}.content{padding:16px;}.stats-grid{grid-template-columns:1fr 1fr;}}
+  </style>
+</head>
+<body>
+<div class="loading-screen" id="loading-screen"><div class="spin"></div></div>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo"><div class="logo-icon">💰</div><div class="logo-text">InvestBD</div></div>
+  <div class="sidebar-user"><div class="avatar" id="sb-avatar">?</div><div><div style="font-size:0.9rem;font-weight:600;" id="sb-name">লোড...</div></div></div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-section-title">মূল মেনু</div>
+      <a href="dashboard.html" class="nav-item"><i class="fas fa-th-large"></i> Dashboard</a>
+      <a href="plans.html" class="nav-item"><i class="fas fa-layer-group"></i> Investment Plans</a>
+      <a href="myplans.html" class="nav-item"><i class="fas fa-list-check"></i> আমার Plans</a>
+      <a href="tasks.html" class="nav-item"><i class="fas fa-tasks"></i> Daily Tasks</a>
+      <a href="deposit.html" class="nav-item"><i class="fas fa-arrow-down-to-line"></i> Deposit</a>
+      <a href="withdraw.html" class="nav-item"><i class="fas fa-arrow-up-from-line"></i> Withdraw</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">আরও</div>
+      <a href="referral.html" class="nav-item active"><i class="fas fa-users"></i> Referral</a>
+      <a href="profile.html" class="nav-item"><i class="fas fa-user-circle"></i> Profile</a>
+      <a href="support.html" class="nav-item"><i class="fas fa-headset"></i> Support</a>
+    </div>
+  </nav>
+  <div class="sidebar-bottom"><button class="logout-btn" id="logout-btn"><i class="fas fa-sign-out-alt"></i> লগআউট</button></div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left"><button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button><div class="page-title">Referral Program</div></div>
+  </div>
+  <div class="content" id="main-content" style="display:none;">
+
+    <!-- ✅ Free Plan Mission -->
+    <div class="mission-box" id="mission-box" style="display:none;">
+      <div class="mission-header">
+        <div class="mission-icon">🎁</div>
+        <div>
+          <div class="mission-title">Free Plan পেতে Mission সম্পন্ন করুন!</div>
+          <div class="mission-sub">নিচের কাজগুলো শেষ করলে বিনামূল্যে একটা plan পাবেন</div>
+        </div>
+      </div>
+      <div class="mission-tasks" id="mission-tasks"></div>
+      <div class="mission-progress">
+        <div class="mission-progress-label"><span>মোট অগ্রগতি</span><span id="mission-progress-text">০%</span></div>
+        <div class="mission-progress-bar"><div class="mission-progress-fill" id="mission-progress-fill" style="width:0%"></div></div>
+      </div>
+      <div class="free-plan-preview">
+        <div>
+          <div class="title">🎁 আপনার Free Plan পুরস্কার</div>
+          <div class="details">
+            <div class="free-plan-detail">মেয়াদ: <span id="fp-days">৭ দিন</span></div>
+            <div class="free-plan-detail">দৈনিক Ad: <span id="fp-adcount">৩টি</span></div>
+            <div class="free-plan-detail">প্রতি Ad: <span id="fp-reward">৳৫</span></div>
+            <div class="free-plan-detail">মোট আয়: <span id="fp-total">৳১০৫</span></div>
+          </div>
+        </div>
+        <div id="claim-area">
+          <button class="claim-btn" id="claim-btn" onclick="claimFreePlan()" disabled>
+            <i class="fas fa-gift"></i> Free Plan নিন
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card c1"><div class="stat-icon"><i class="fas fa-users"></i></div><div class="stat-lbl">মোট Referral</div><div class="stat-val" id="ref-count">০ জন</div></div>
+      <div class="stat-card c2"><div class="stat-icon"><i class="fas fa-coins"></i></div><div class="stat-lbl">মোট আয়</div><div class="stat-val" id="ref-earned">৳০</div></div>
+      <div class="stat-card c3"><div class="stat-icon"><i class="fas fa-user-check"></i></div><div class="stat-lbl">Plan কিনেছে</div><div class="stat-val" id="ref-bought">০ জন</div></div>
+      <div class="stat-card c4"><div class="stat-icon"><i class="fas fa-gift"></i></div><div class="stat-lbl">Free Plan</div><div class="stat-val" id="free-plan-status">পাননি</div></div>
+    </div>
+
+    <!-- Referral Code -->
+    <div class="ref-hero">
+      <div class="ref-hero-title"><i class="fas fa-gift"></i> আপনার Referral কোড ও লিংক</div>
+      <div class="ref-hero-sub">বন্ধুদের share করুন — তারা plan কিনলেই আপনি বোনাস পাবেন!</div>
+      <div class="ref-code-row">
+        <div class="ref-code-box" id="ref-code">লোড...</div>
+        <button class="copy-btn" onclick="copyCode()"><i class="fas fa-copy"></i> কোড কপি</button>
+      </div>
+      <div class="ref-link-row">
+        <div class="ref-link-box" id="ref-link">লোড...</div>
+        <button class="copy-link-btn" onclick="copyLink()"><i class="fas fa-link"></i> কপি</button>
+      </div>
+      <div class="share-btns">
+        <button class="share-btn wa" onclick="shareWA()"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+        <button class="share-btn fb" onclick="shareFB()"><i class="fab fa-facebook"></i> Facebook</button>
+        <button class="share-btn tg" onclick="shareTG()"><i class="fab fa-telegram"></i> Telegram</button>
+      </div>
+    </div>
+
+    <!-- Bonus Table -->
+    <div class="panel">
+      <div class="panel-header"><i class="fas fa-percentage"></i> Referral বোনাস হার</div>
+      <table class="bonus-table">
+        <thead><tr><th>Plan</th><th>বিনিয়োগ</th><th>Referral বোনাস</th><th>আপনি পাবেন</th></tr></thead>
+        <tbody>
+          <tr><td>🥉 Basic</td><td>৳৫০০</td><td style="color:var(--gold);font-weight:700;">৫%</td><td style="color:var(--success);font-weight:700;">৳২৫</td></tr>
+          <tr><td>🥈 Silver</td><td>৳১,০০০</td><td style="color:var(--gold);font-weight:700;">৭%</td><td style="color:var(--success);font-weight:700;">৳৭০</td></tr>
+          <tr><td>🥇 Gold</td><td>৳৫,০০০</td><td style="color:var(--gold);font-weight:700;">১০%</td><td style="color:var(--success);font-weight:700;">৳৫০০</td></tr>
+          <tr><td>💎 Diamond</td><td>৳১০,০০০</td><td style="color:var(--gold);font-weight:700;">১২%</td><td style="color:var(--success);font-weight:700;">৳১,২০০</td></tr>
+          <tr><td>👑 VIP</td><td>৳২৫,০০০</td><td style="color:var(--gold);font-weight:700;">১৫%</td><td style="color:var(--success);font-weight:700;">৳৩,৭৫০</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCu-UBa4vCRLByPkQqlb5JjVvuHqMFPYxM",
+    authDomain: "investbd-783df.firebaseapp.com",
+    projectId: "investbd-783df",
+    storageBucket: "investbd-783df.firebasestorage.app",
+    messagingSenderId: "1043148979663",
+    appId: "1:1043148979663:web:20465ee152597ce101e6ba"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let currentUser = null;
+  let userData = null;
+  let freePlanSettings = null;
+  let refCode = '';
+  let refLink = '';
+
+  let authChecked = false;
+  onAuthStateChanged(auth, async user => {
+    if(authChecked) return;
+    authChecked = true;
+    if(!user){ window.location.replace('index.html'); return; }
+    currentUser = user;
+
+    // User data
+    const userSnap = await getDoc(doc(db,'users',user.uid));
+    if(!userSnap.exists()){ window.location.replace('index.html'); return; }
+    userData = userSnap.data();
+
+    document.getElementById('sb-avatar').textContent = userData.name.charAt(0).toUpperCase();
+    document.getElementById('sb-name').textContent = userData.name;
+
+    refCode = userData.referralCode || '—';
+    refLink = window.location.origin+'/index.html?ref='+refCode;
+    document.getElementById('ref-code').textContent = refCode;
+    document.getElementById('ref-link').textContent = refLink;
+    document.getElementById('ref-count').textContent = (userData.referralCount||0)+' জন';
+    document.getElementById('ref-earned').textContent = '৳'+(userData.referralEarned||0).toLocaleString();
+    document.getElementById('ref-bought').textContent = (userData.referralBought||0)+' জন';
+
+    // ✅ Free Plan Settings Firebase থেকে load
+    try {
+      const fpSnap = await getDoc(doc(db,'settings','freePlan'));
+      if(fpSnap.exists()){
+        freePlanSettings = fpSnap.data();
+        if(freePlanSettings.enabled){
+          showMission();
+        }
+      }
+    } catch(e){}
+
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('main-content').style.display = 'block';
+  });
+
+  async function showMission() {
+    const fp = freePlanSettings;
+    const requiredRefs = fp.requiredRefs || 10;
+    const requiredBuyers = fp.requiredBuyers || 3;
+    const currentRefs = userData.referralCount || 0;
+    const currentBuyers = userData.referralBought || 0;
+    const alreadyClaimed = userData.freePlanClaimed || false;
+
+    // Free plan preview
+    const adCount = fp.adCount || 3;
+    const adReward = fp.adReward || 5;
+    const days = fp.days || 7;
+    document.getElementById('fp-days').textContent = days+' দিন';
+    document.getElementById('fp-adcount').textContent = adCount+'টি';
+    document.getElementById('fp-reward').textContent = '৳'+adReward;
+    document.getElementById('fp-total').textContent = '৳'+(adCount*adReward*days).toLocaleString();
+
+    // Tasks
+    const task1Done = currentRefs >= requiredRefs;
+    const task2Done = currentBuyers >= requiredBuyers;
+    const allDone = task1Done && task2Done;
+
+    const tasksHTML = `
+      <div class="mission-task ${task1Done?'done':''}">
+        <div class="mission-task-icon"><i class="fas fa-${task1Done?'check':'users'}"></i></div>
+        <div class="mission-task-info">
+          <div class="mission-task-title">👥 ${requiredRefs} জনকে Refer করুন</div>
+          <div class="mission-task-progress">অগ্রগতি: ${Math.min(currentRefs,requiredRefs)}/${requiredRefs} জন</div>
+        </div>
+        <span class="mission-task-badge">${task1Done?'✅ সম্পন্ন':`${currentRefs}/${requiredRefs}`}</span>
+      </div>
+      <div class="mission-task ${task2Done?'done':''}">
+        <div class="mission-task-icon"><i class="fas fa-${task2Done?'check':'shopping-cart'}"></i></div>
+        <div class="mission-task-info">
+          <div class="mission-task-title">💳 ${requiredBuyers} জন যেকোনো Plan কিনুক</div>
+          <div class="mission-task-progress">অগ্রগতি: ${Math.min(currentBuyers,requiredBuyers)}/${requiredBuyers} জন</div>
+        </div>
+        <span class="mission-task-badge">${task2Done?'✅ সম্পন্ন':`${currentBuyers}/${requiredBuyers}`}</span>
+      </div>`;
+
+    document.getElementById('mission-tasks').innerHTML = tasksHTML;
+
+    // Progress
+    const totalSteps = requiredRefs + requiredBuyers;
+    const doneSteps = Math.min(currentRefs,requiredRefs) + Math.min(currentBuyers,requiredBuyers);
+    const pct = Math.round((doneSteps/totalSteps)*100);
+    document.getElementById('mission-progress-fill').style.width = pct+'%';
+    document.getElementById('mission-progress-text').textContent = pct+'%';
+
+    // Claim button
+    if(alreadyClaimed){
+      document.getElementById('claim-area').innerHTML = '<div class="already-claimed">✅ Free Plan নেওয়া হয়েছে!</div>';
+      document.getElementById('free-plan-status').textContent = '✅ পেয়েছেন';
+    } else if(allDone){
+      document.getElementById('claim-btn').disabled = false;
+    }
+
+    document.getElementById('mission-box').style.display = 'block';
+  }
+
+  // ✅ Free Plan Claim
+  window.claimFreePlan = async function() {
+    const fp = freePlanSettings;
+    const btn = document.getElementById('claim-btn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> অপেক্ষা করুন...';
+    btn.disabled = true;
+    try {
+      // userPlans এ free plan add
+      await setDoc(doc(db,'userPlans',`free_${currentUser.uid}`),{
+        uid: currentUser.uid,
+        planName: 'Free Plan 🎁',
+        planEmoji: '🎁',
+        invest: 0,
+        dailyIncome: (fp.adCount||3) * (fp.adReward||5),
+        days: fp.days || 7,
+        daysLeft: fp.days || 7,
+        adCount: fp.adCount || 3,
+        rewardPerAd: fp.adReward || 5,
+        totalEarned: 0,
+        status: 'active',
+        isFree: true,
+        startDate: new Date().toISOString()
+      });
+      // user এ freePlanClaimed = true
+      await updateDoc(doc(db,'users',currentUser.uid),{ freePlanClaimed: true });
+      document.getElementById('claim-area').innerHTML = '<div class="already-claimed">✅ Free Plan নেওয়া হয়েছে!</div>';
+      document.getElementById('free-plan-status').textContent = '✅ পেয়েছেন';
+      alert('🎉 আপনার Free Plan সক্রিয় হয়েছে! Daily Tasks এ গিয়ে আয় করুন।');
+    } catch(e){
+      btn.innerHTML = '<i class="fas fa-gift"></i> Free Plan নিন';
+      btn.disabled = false;
+      alert('সমস্যা হয়েছে।');
+    }
+  }
+
+  document.getElementById('logout-btn').addEventListener('click', async()=>{ await signOut(auth); window.location.replace('index.html'); });
+
+  window.copyCode=()=>{navigator.clipboard.writeText(refCode).then(()=>{const b=document.querySelector('.copy-btn');b.innerHTML='✅ কপি!';setTimeout(()=>{b.innerHTML='<i class="fas fa-copy"></i> কোড কপি';},2000);});}
+  window.copyLink=()=>{navigator.clipboard.writeText(refLink).then(()=>{const b=document.querySelector('.copy-link-btn');b.innerHTML='✅';setTimeout(()=>{b.innerHTML='<i class="fas fa-link"></i> কপি';},2000);});}
+  window.shareWA=()=>window.open('https://wa.me/?text=InvestBD তে যোগ দিন! '+refLink);
+  window.shareFB=()=>window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(refLink));
+  window.shareTG=()=>window.open('https://t.me/share/url?url='+encodeURIComponent(refLink));
+  window.toggleSidebar=()=>{document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show');}
+  window.closeSidebar=()=>{document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');}
+</script>
+</body>
+</html>
