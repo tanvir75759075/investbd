@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>InvestBD - Daily Tasks</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    :root{--gold:#f5c518;--gold-light:#ffd84d;--gold-dark:#c9a000;--dark:#0a0a0f;--dark2:#111118;--dark3:#1a1a25;--text:#e8e8f0;--text-muted:#888899;--success:#00e676;--error:#ff5252;--warning:#ffab40;--border:rgba(245,197,24,0.15);--sidebar-w:260px;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Hind Siliguri',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;display:flex;}
+    .sidebar{width:var(--sidebar-w);background:var(--dark2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;transition:transform 0.3s;}
+    .sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+    .sidebar-logo .logo-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+    .sidebar-logo .logo-text{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:800;background:linear-gradient(135deg,var(--gold-light),var(--gold-dark));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .sidebar-user{padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+    .avatar{width:44px;height:44px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#000;flex-shrink:0;}
+    .sidebar-nav{flex:1;padding:16px 12px;overflow-y:auto;}
+    .nav-section{margin-bottom:24px;}
+    .nav-section-title{font-size:0.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1.5px;padding:0 8px;margin-bottom:8px;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;cursor:pointer;transition:all 0.2s;color:var(--text-muted);font-size:0.88rem;font-weight:500;margin-bottom:2px;text-decoration:none;}
+    .nav-item i{width:18px;text-align:center;font-size:15px;}
+    .nav-item:hover{background:rgba(245,197,24,0.06);color:var(--text);}
+    .nav-item.active{background:rgba(245,197,24,0.1);color:var(--gold);border:1px solid rgba(245,197,24,0.15);}
+    .sidebar-bottom{padding:16px 12px;border-top:1px solid var(--border);}
+    .logout-btn{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;cursor:pointer;color:var(--error);font-size:0.88rem;font-weight:500;width:100%;background:none;border:none;font-family:'Hind Siliguri',sans-serif;}
+    .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;}
+    .topbar{background:rgba(17,17,24,0.95);border-bottom:1px solid var(--border);padding:0 28px;height:64px;display:flex;align-items:center;position:sticky;top:0;z-index:50;backdrop-filter:blur(10px);}
+    .topbar-left{display:flex;align-items:center;gap:12px;}
+    .menu-toggle{display:none;background:none;border:none;color:var(--text);font-size:20px;cursor:pointer;}
+    .page-title{font-size:1.1rem;font-weight:600;}
+    .content{padding:28px;max-width:800px;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading-screen{position:fixed;inset:0;background:var(--dark);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;}
+    .spin{width:32px;height:32px;border:3px solid rgba(245,197,24,0.2);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;}
+
+    /* Summary */
+    .summary-bar{background:linear-gradient(135deg,rgba(245,197,24,0.1),rgba(245,197,24,0.03));border:1px solid var(--border);border-radius:16px;padding:22px 28px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+    .summary-info{display:flex;gap:24px;flex-wrap:wrap;}
+    .s-item .lbl{font-size:0.75rem;color:var(--text-muted);margin-bottom:4px;}
+    .s-item .val{font-size:1.2rem;font-weight:700;color:var(--gold);}
+    .progress-outer{flex:1;max-width:200px;}
+    .progress-label{display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);margin-bottom:6px;}
+    .progress-bar{height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;}
+    .progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-light));border-radius:4px;transition:width 0.5s ease;}
+
+    /* Empty states */
+    .no-plan-box{background:var(--dark2);border:1px solid var(--border);border-radius:14px;padding:40px;text-align:center;}
+    .no-plan-box .icon{font-size:3rem;margin-bottom:14px;}
+    .no-plan-box h3{font-size:1.1rem;font-weight:700;margin-bottom:8px;}
+    .no-plan-box p{font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;}
+    .btn-gold{padding:12px 24px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border:none;border-radius:10px;color:#000;font-family:'Hind Siliguri',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;}
+
+    /* Tasks */
+    .tasks-list{display:flex;flex-direction:column;gap:12px;margin-bottom:24px;}
+    .plan-label{font-size:0.8rem;font-weight:700;color:var(--text-muted);padding:6px 0 2px;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:6px;}
+    .plan-label i{color:var(--gold);}
+    .task-card{background:var(--dark2);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:14px;transition:all 0.2s;}
+    .task-card.completed{border-color:rgba(0,230,118,0.2);background:rgba(0,230,118,0.02);}
+    .task-card.locked{opacity:0.45;}
+    .task-num{width:36px;height:36px;border-radius:50%;background:rgba(245,197,24,0.1);border:2px solid rgba(245,197,24,0.2);display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;color:var(--gold);flex-shrink:0;}
+    .task-card.completed .task-num{background:rgba(0,230,118,0.1);border-color:rgba(0,230,118,0.3);color:var(--success);}
+    .task-info{flex:1;}
+    .task-title{font-size:0.88rem;font-weight:600;margin-bottom:3px;}
+    .task-desc{font-size:0.75rem;color:var(--text-muted);}
+    .task-reward{font-size:0.95rem;font-weight:700;color:var(--gold);margin-right:10px;white-space:nowrap;}
+    .task-btn{padding:8px 16px;border:none;border-radius:8px;font-family:'Hind Siliguri',sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+    .task-btn.watch{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#000;}
+    .task-btn.watch:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(245,197,24,0.3);}
+    .task-btn.done{background:rgba(0,230,118,0.1);color:var(--success);border:1px solid rgba(0,230,118,0.2);cursor:default;}
+    .task-btn.waiting{background:rgba(255,255,255,0.05);color:var(--text-muted);cursor:not-allowed;}
+
+    /* All done */
+    .all-done-box{background:linear-gradient(135deg,rgba(0,230,118,0.1),rgba(0,230,118,0.02));border:1px solid rgba(0,230,118,0.2);border-radius:14px;padding:32px;text-align:center;margin-bottom:24px;}
+    .all-done-box h3{font-size:1.2rem;font-weight:700;color:var(--success);margin-bottom:8px;}
+    .all-done-box p{font-size:0.85rem;color:var(--text-muted);}
+    .reset-box{background:var(--dark2);border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:10px;font-size:0.83rem;color:var(--text-muted);}
+    .reset-box i{color:var(--gold);}
+    .reset-time{color:var(--gold);font-weight:700;}
+
+    /* ✅ Ad Viewer Modal — Ad ভেতরে দেখাবে */
+    .ad-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.97);z-index:500;display:none;flex-direction:column;}
+    .ad-overlay.show{display:flex;}
+    .ad-top-bar{background:var(--dark2);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+    .ad-top-left{display:flex;align-items:center;gap:10px;}
+    .ad-top-title{font-size:0.9rem;font-weight:700;}
+    .ad-timer-badge{background:rgba(245,197,24,0.1);border:1px solid rgba(245,197,24,0.2);color:var(--gold);font-size:0.9rem;font-weight:800;padding:6px 16px;border-radius:20px;display:flex;align-items:center;gap:6px;min-width:90px;justify-content:center;}
+    .ad-progress-wrap{flex-shrink:0;padding:0 0 4px;}
+    .ad-progress-bar{height:5px;background:rgba(255,255,255,0.06);}
+    .ad-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-light));transition:width 1s linear;width:100%;}
+    .ad-frame-area{flex:1;position:relative;overflow:hidden;}
+    .ad-iframe{width:100%;height:100%;border:none;display:block;}
+    /* ✅ Ad এর উপরে block layer — user বের হতে পারবে না */
+    .ad-block-layer{position:absolute;inset:0;z-index:10;background:transparent;cursor:not-allowed;}
+    .ad-block-layer.hide{display:none;}
+    .ad-bottom-bar{background:var(--dark2);border-top:1px solid var(--border);padding:14px 20px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+    .ad-watching-text{font-size:0.82rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;}
+    .ad-complete-btn{padding:12px 28px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border:none;border-radius:10px;color:#000;font-family:'Hind Siliguri',sans-serif;font-size:0.92rem;font-weight:700;cursor:pointer;display:none;transition:all 0.2s;}
+    .ad-complete-btn.show{display:block;}
+    .ad-complete-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(245,197,24,0.3);}
+
+    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;}
+    .overlay.show{display:block;}
+    @media(max-width:768px){.sidebar{transform:translateX(-100%);}.sidebar.open{transform:translateX(0);}.main{margin-left:0;}.menu-toggle{display:block;}.content{padding:16px;}.task-card{flex-wrap:wrap;}.summary-bar{flex-direction:column;}}
+  </style>
+</head>
+<body>
+<div class="loading-screen" id="loading-screen"><div class="spin"></div><div style="font-size:0.85rem;color:var(--text-muted);">লোড হচ্ছে...</div></div>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ✅ Full Screen Ad Viewer — বের হওয়া যাবে না -->
+<div class="ad-overlay" id="adOverlay">
+  <div class="ad-top-bar">
+    <div class="ad-top-left">
+      <div class="ad-top-title">👀 Ad দেখুন — বের হবেন না</div>
+    </div>
+    <div class="ad-timer-badge">
+      <i class="fas fa-clock"></i>
+      <span id="ad-timer-num">30</span>s
+    </div>
+  </div>
+  <div class="ad-progress-wrap">
+    <div class="ad-progress-bar">
+      <div class="ad-progress-fill" id="ad-progress-fill"></div>
+    </div>
+  </div>
+  <div class="ad-frame-area">
+    <iframe class="ad-iframe" id="ad-iframe" src="" scrolling="yes" allowfullscreen></iframe>
+    <!-- Block layer — timer শেষ হওয়ার আগে click block -->
+    <div class="ad-block-layer" id="ad-block-layer"></div>
+  </div>
+  <div class="ad-bottom-bar">
+    <div class="ad-watching-text" id="ad-watching-text">
+      <i class="fas fa-eye"></i> Ad দেখুন, সময় শেষ হলে income পাবেন...
+    </div>
+    <button class="ad-complete-btn" id="ad-complete-btn" onclick="completeTask()">
+      <i class="fas fa-check-circle"></i> ৳<span id="ad-reward-amount">5</span> Income নিন!
+    </button>
+  </div>
+</div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo"><div class="logo-icon">💰</div><div class="logo-text">InvestBD</div></div>
+  <div class="sidebar-user">
+    <div class="avatar" id="sb-avatar">?</div>
+    <div>
+      <div style="font-size:0.9rem;font-weight:600;" id="sb-name">লোড...</div>
+      <div style="font-size:0.75rem;color:var(--gold);" id="sb-balance">৳০</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-section-title">মূল মেনু</div>
+      <a href="dashboard.html" class="nav-item"><i class="fas fa-th-large"></i> Dashboard</a>
+      <a href="plans.html" class="nav-item"><i class="fas fa-layer-group"></i> Investment Plans</a>
+      <a href="myplans.html" class="nav-item"><i class="fas fa-list-check"></i> আমার Plans</a>
+      <a href="tasks.html" class="nav-item active"><i class="fas fa-tasks"></i> Daily Tasks</a>
+      <a href="deposit.html" class="nav-item"><i class="fas fa-arrow-down-to-line"></i> Deposit</a>
+      <a href="withdraw.html" class="nav-item"><i class="fas fa-arrow-up-from-line"></i> Withdraw</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">আরও</div>
+      <a href="referral.html" class="nav-item"><i class="fas fa-users"></i> Referral</a>
+      <a href="profile.html" class="nav-item"><i class="fas fa-user-circle"></i> Profile</a>
+      <a href="support.html" class="nav-item"><i class="fas fa-headset"></i> Support</a>
+    </div>
+  </nav>
+  <div class="sidebar-bottom"><button class="logout-btn" id="logout-btn"><i class="fas fa-sign-out-alt"></i> লগআউট</button></div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+      <div class="page-title">Daily Tasks</div>
+    </div>
+  </div>
+  <div class="content" id="main-content" style="display:none;"></div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCu-UBa4vCRLByPkQqlb5JjVvuHqMFPYxM",
+    authDomain: "investbd-783df.firebaseapp.com",
+    projectId: "investbd-783df",
+    storageBucket: "investbd-783df.firebasestorage.app",
+    messagingSenderId: "1043148979663",
+    appId: "1:1043148979663:web:20465ee152597ce101e6ba"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let currentUser = null;
+  let taskSettings = null;
+  let todayProgress = {};
+  let activePlans = [];
+  let timerInterval = null;
+  let currentReward = 5;
+
+  function todayKey() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  function getNextMidnight() {
+    const now = new Date();
+    const midnight = new Date(now); midnight.setHours(24,0,0,0);
+    const diff = midnight - now;
+    const h = Math.floor(diff/3600000);
+    const m = Math.floor((diff%3600000)/60000);
+    const s = Math.floor((diff%60000)/1000);
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+
+  // ✅ Back button block — ad দেখার সময় বের হওয়া যাবে না
+  function blockBack() {
+    history.pushState(null, '', location.href);
+    window.onpopstate = function() {
+      history.pushState(null, '', location.href);
+    };
+  }
+
+  function unblockBack() {
+    window.onpopstate = null;
+  }
+
+  let authChecked = false;
+  onAuthStateChanged(auth, async user => {
+    if(authChecked) return;
+    authChecked = true;
+    if(!user){ window.location.replace('index.html'); return; }
+    currentUser = user;
+
+    const userSnap = await getDoc(doc(db,'users',user.uid));
+    if(!userSnap.exists()){ window.location.replace('index.html'); return; }
+    const userData = userSnap.data();
+    document.getElementById('sb-avatar').textContent = userData.name.charAt(0).toUpperCase();
+    document.getElementById('sb-name').textContent = userData.name;
+    document.getElementById('sb-balance').textContent = '৳'+(userData.balance||0).toLocaleString();
+
+    // Firebase থেকে task settings load
+    try {
+      const settSnap = await getDoc(doc(db,'settings','tasks'));
+      taskSettings = settSnap.exists() ? settSnap.data() : { enabled: false };
+    } catch(e){ taskSettings = { enabled: false }; }
+
+    // আজকের progress load
+    try {
+      const progSnap = await getDoc(doc(db,'taskProgress',`${user.uid}_${todayKey()}`));
+      todayProgress = progSnap.exists() ? progSnap.data() : {};
+    } catch(e){ todayProgress = {}; }
+
+    // Active plans load + expire check
+    try {
+      const plansSnap = await getDocs(query(collection(db,'userPlans'),where('uid','==',user.uid),where('status','==','active')));
+      activePlans = [];
+      const today = new Date();
+      for(const d of plansSnap.docs){
+        const plan = {id:d.id,...d.data()};
+        if(plan.startDate){
+          const start = new Date(plan.startDate);
+          const daysPassed = Math.floor((today - start)/(1000*60*60*24));
+          if(daysPassed >= (plan.days||30)){
+            // ✅ Expire করে দাও
+            await updateDoc(doc(db,'userPlans',plan.id),{status:'expired',daysLeft:0});
+            continue; // active list এ যাবে না
+          } else {
+            const daysLeft = Math.max(0,(plan.days||30)-daysPassed);
+            await updateDoc(doc(db,'userPlans',plan.id),{daysLeft});
+            plan.daysLeft = daysLeft;
+          }
+        }
+        activePlans.push(plan);
+      }
+    } catch(e){ activePlans = []; }
+
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('main-content').style.display = 'block';
+    renderPage();
+
+    setInterval(()=>{
+      const el = document.getElementById('reset-countdown');
+      if(el) el.textContent = getNextMidnight();
+    }, 1000);
+  });
+
+  document.getElementById('logout-btn').addEventListener('click', async()=>{ await signOut(auth); window.location.replace('index.html'); });
+
+  function renderPage() {
+    const content = document.getElementById('main-content');
+
+    if(!taskSettings || !taskSettings.enabled){
+      content.innerHTML = `<div class="no-plan-box"><div class="icon">⏸</div><h3>Tasks এখন বন্ধ আছে</h3><p>Admin সাময়িকভাবে task system বন্ধ রেখেছেন।</p></div>`;
+      return;
+    }
+
+    if(activePlans.length === 0){
+      content.innerHTML = `<div class="no-plan-box"><div class="icon">📦</div><h3>কোনো Active Plan নেই!</h3><p>Daily tasks করতে হলে আগে একটা Investment Plan কিনতে হবে।</p><a href="plans.html" class="btn-gold"><i class="fas fa-shopping-cart"></i> Plan কিনুন</a></div>`;
+      return;
+    }
+
+    const timerSec = taskSettings.timerSeconds || 30;
+
+    // ✅ প্রতিটা plan এর নিজস্ব adCount ও rewardPerAd ব্যবহার হবে (কেনার সময় যা set ছিল)
+    let totalTasks = 0;
+    activePlans.forEach(p => {
+      totalTasks += p.adCount || Math.ceil((p.dailyIncome||0)/(p.rewardPerAd||5));
+    });
+
+    const completedTasks = todayProgress.completedTasks || 0;
+    const earnedToday = todayProgress.earnedToday || 0;
+    const remaining = Math.max(0, totalTasks - completedTasks);
+    const progress = totalTasks > 0 ? Math.round((completedTasks/totalTasks)*100) : 0;
+
+    if(completedTasks >= totalTasks && totalTasks > 0){
+      content.innerHTML = `
+        <div class="all-done-box">
+          <div style="font-size:3rem;margin-bottom:12px;">🎉</div>
+          <h3>আজকের সব Task সম্পন্ন!</h3>
+          <p>আপনি আজ ৳${earnedToday.toLocaleString()} আয় করেছেন।<br/>আগামীকাল রাত ১২টায় নতুন task আসবে।</p>
+        </div>
+        <div class="reset-box"><i class="fas fa-clock"></i><span>পরের task: <span class="reset-time" id="reset-countdown">${getNextMidnight()}</span> পরে</span></div>`;
+      return;
+    }
+
+    let tasksHTML = '';
+    let globalIndex = 0;
+    activePlans.forEach(p => {
+      const tasks = p.adCount || Math.ceil((p.dailyIncome||0)/(p.rewardPerAd||5));
+      const planReward = p.rewardPerAd || 5;
+      tasksHTML += `<div class="plan-label"><i class="fas fa-layer-group"></i>${p.planEmoji||''} ${p.planName} — ${tasks}টি Task (৳${(tasks*planReward).toLocaleString()})</div>`;
+      for(let i=0; i<tasks; i++){
+        const isDone = globalIndex < completedTasks;
+        const isNext = globalIndex === completedTasks;
+        const isLock = globalIndex > completedTasks;
+        tasksHTML += `
+          <div class="task-card ${isDone?'completed':''} ${isLock?'locked':''}">
+            <div class="task-num">${isDone?'<i class="fas fa-check"></i>':globalIndex+1}</div>
+            <div class="task-info">
+              <div class="task-title">Ad দেখুন — Task ${globalIndex+1}</div>
+              <div class="task-desc">${isDone?'সম্পন্ন ✅':isNext?`${timerSec} সেকেন্ড Ad দেখুন`:'আগের task করুন'}</div>
+            </div>
+            <div class="task-reward">+৳${planReward}</div>
+            ${isDone?`<button class="task-btn done">✅ সম্পন্ন</button>`
+              :isNext?`<button class="task-btn watch" onclick="startTask(${planReward},${timerSec})"><i class="fas fa-play"></i> শুরু করুন</button>`
+              :`<button class="task-btn waiting">🔒</button>`}
+          </div>`;
+        globalIndex++;
+      }
+    });
+
+    content.innerHTML = `
+      <div class="summary-bar">
+        <div class="summary-info">
+          <div class="s-item"><div class="lbl">আজকের আয়</div><div class="val">৳${earnedToday.toLocaleString()}</div></div>
+          <div class="s-item"><div class="lbl">বাকি Tasks</div><div class="val">${remaining}টি</div></div>
+        </div>
+        <div class="progress-outer">
+          <div class="progress-label"><span>অগ্রগতি</span><span>${completedTasks}/${totalTasks}</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+        </div>
+      </div>
+      <div class="tasks-list">${tasksHTML}</div>
+      <div class="reset-box"><i class="fas fa-clock"></i><span>নতুন task: <span class="reset-time" id="reset-countdown">${getNextMidnight()}</span> পরে</span></div>`;
+  }
+
+  // ✅ Task শুরু — Ad ভেতরে দেখাবে, বের হওয়া যাবে না
+  window.startTask = function(reward, seconds) {
+    currentReward = reward;
+    const adLink = taskSettings.adLink || 'about:blank';
+
+    // Ad iframe এ load
+    document.getElementById('ad-iframe').src = adLink;
+    document.getElementById('ad-reward-amount').textContent = reward;
+    document.getElementById('ad-timer-num').textContent = seconds;
+    document.getElementById('ad-complete-btn').classList.remove('show');
+    document.getElementById('ad-watching-text').innerHTML = '<i class="fas fa-eye"></i> Ad দেখুন, সময় শেষ হলে income পাবেন...';
+    document.getElementById('ad-block-layer').classList.remove('hide');
+    document.getElementById('ad-progress-fill').style.width = '100%';
+    document.getElementById('adOverlay').classList.add('show');
+
+    // Back button block
+    blockBack();
+
+    // Timer শুরু
+    let remaining = seconds;
+    if(timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(()=>{
+      remaining--;
+      document.getElementById('ad-timer-num').textContent = remaining;
+      const pct = ((seconds - remaining) / seconds) * 100;
+      document.getElementById('ad-progress-fill').style.width = (100-pct)+'%';
+
+      if(remaining <= 0){
+        clearInterval(timerInterval);
+        document.getElementById('ad-timer-num').textContent = '✓';
+        document.getElementById('ad-block-layer').classList.add('hide');
+        document.getElementById('ad-watching-text').innerHTML = '<i class="fas fa-check-circle" style="color:var(--success)"></i> দেখা সম্পন্ন! Income নিন।';
+        document.getElementById('ad-complete-btn').classList.add('show');
+      }
+    }, 1000);
+  }
+
+  // ✅ Task complete — double click protection
+  let isProcessing = false;
+  window.completeTask = async function() {
+    if(isProcessing) return;
+    isProcessing = true;
+    clearInterval(timerInterval);
+    document.getElementById('ad-complete-btn').disabled = true;
+    document.getElementById('adOverlay').classList.remove('show');
+    document.getElementById('ad-iframe').src = 'about:blank';
+    unblockBack();
+
+    try {
+      // ✅ Firebase থেকে latest progress পড়ে নাও — duplicate prevent
+      const progSnap = await getDoc(doc(db,'taskProgress',`${currentUser.uid}_${todayKey()}`));
+      const latestProgress = progSnap.exists() ? progSnap.data() : {};
+      const latestCompleted = latestProgress.completedTasks || 0;
+
+      // যদি local count আর Firebase count মিলে না তাহলে fraud — বন্ধ করো
+      if(latestCompleted !== (todayProgress.completedTasks || 0)){
+        todayProgress.completedTasks = latestCompleted;
+        todayProgress.earnedToday = latestProgress.earnedToday || 0;
+        isProcessing = false;
+        renderPage();
+        return;
+      }
+
+      const userSnap = await getDoc(doc(db,'users',currentUser.uid));
+      const d = userSnap.data();
+      const newBal = (d.balance||0) + currentReward;
+      await updateDoc(doc(db,'users',currentUser.uid),{
+        balance: newBal,
+        totalEarned: (d.totalEarned||0) + currentReward
+      });
+      document.getElementById('sb-balance').textContent = '৳'+newBal.toLocaleString();
+
+      const newCompleted = latestCompleted + 1;
+      const newEarned = (latestProgress.earnedToday||0) + currentReward;
+      todayProgress.completedTasks = newCompleted;
+      todayProgress.earnedToday = newEarned;
+
+      await setDoc(doc(db,'taskProgress',`${currentUser.uid}_${todayKey()}`),{
+        uid: currentUser.uid,
+        completedTasks: newCompleted,
+        earnedToday: newEarned,
+        date: todayKey(),
+        updatedAt: new Date().toISOString()
+      });
+
+      renderPage();
+    } catch(e){ console.error(e); alert('সমস্যা হয়েছে।'); }
+    finally { isProcessing = false; }
+  }
+
+  window.toggleSidebar=()=>{document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show');}
+  window.closeSidebar=()=>{document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');}
+</script>
+</body>
+</html>
